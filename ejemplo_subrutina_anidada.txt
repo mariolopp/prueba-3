@@ -1,0 +1,27 @@
+b	ejemplo_subrutinas_anidadas	# Salto a la primera orden del ejemplo
+subrutina_anidada:
+[Instrucciones cualesquiera de la subrutina]
+jr	$ra	# Salta a la siguiente linea del jal que ha llamado a esta subrutina (el valor guardado en $ra)
+
+
+etiqueta_subrutina: # Esta es la primera subrutina a la que se salta
+
+# Antes de llamar a otra subrutina debemos guardar el valor actual de retorno de ra en la pila
+addi 	$sp, $sp, -4	# Reservamos espacio en la pila para guardar la direccion para poder retroceder.
+sw	$ra, 0($sp)	# Guardamos la direccion de la llamada original en la pila para volver posteriormente.
+	
+# El siguiente jal salta a otra subrutina. Esta segunda subrutina no necesita usar la pila si no llama a ninguna subrutina mas,
+# ya que al hacer al salto del jal se ha guardado el valor de regreso a la orden siguiente a este en el registro $ra (valor el cual machaca al anterior valor de reotrno que habíamos respaldado en # la pila justo antes)
+
+jal 	subrutina_anidada	
+	
+lw 	$ra, 0($sp)	# Cargamos en $ra la direccion de retroceso anteriormente guardada desde la pila.
+addi 	$sp,$sp,4	# Movemos el puntero de la pila para liberar el espacio con la direccion que ya hemos recuperado
+jr	$ra		# Regresamos a la siguiente linea del jal original
+
+
+# PRIMERA ORDEN EN EJECUTARSE
+ejemplo_subrutinas_anidadas:
+jal etiqueta_subrutina # Salta a una subrutina y guarda el valor de retorno a la instrucción siguiente a esta en &ra
+
+# Final del programa
